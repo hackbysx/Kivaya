@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+a<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -6,247 +6,545 @@
     <title>FLEXI V8 DOMINATOR - QUAD CORE MASTER</title>
     <style>
         :root {
-            --bg-primary: #08090f;
-            --bg-secondary: #0f111a;
+            --bg-primary: #0a0b10;
+            --bg-secondary: #121420;
             --neon-blue: #00f3ff;
             --neon-purple: #9d4edd;
             --neon-green: #39ff14;
             --neon-red: #ff3131;
             --text-main: #ffffff;
-            --text-muted: #64748b;
-            --gold: #ffd700;
+            --text-muted: #8a8f98;
+            --gold: #ffea00;
         }
 
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Roboto, sans-serif; }
-        body { background-color: var(--bg-primary); color: var(--text-main); display: flex; justify-content: center; align-items: center; min-height: 100vh; padding: 20px; }
-        
-        .master-container { width: 100%; max-width: 460px; background: var(--bg-secondary); border: 2px solid var(--neon-purple); border-radius: 24px; box-shadow: 0 0 30px rgba(157, 78, 221, 0.25); padding: 25px; position: relative; }
-        .header { text-align: center; margin-bottom: 20px; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 15px; }
-        .header h1 { font-size: 22px; font-weight: 900; letter-spacing: 1px; background: linear-gradient(135deg, var(--neon-blue), var(--neon-purple)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; text-transform: uppercase; }
-        .header p { font-size: 10px; color: var(--text-muted); margin-top: 4px; letter-spacing: 3px; text-transform: uppercase; }
-        
-        .display-panel { background: rgba(0, 0, 0, 0.4); border: 1px solid rgba(0, 243, 255, 0.2); border-radius: 16px; padding: 20px; text-align: center; margin-bottom: 20px; }
-        .current-period { font-size: 13px; color: var(--text-muted); }
-        .current-period span { color: var(--neon-blue); font-weight: bold; font-family: monospace; }
-        .timer-display { font-size: 24px; color: var(--gold); font-weight: 800; margin: 5px 0; font-family: monospace; }
-        
-        .prediction-output { font-size: 44px; font-weight: 900; letter-spacing: 2px; margin: 8px 0; text-transform: uppercase; }
-        .prediction-output.big { color: var(--neon-green); text-shadow: 0 0 20px rgba(57, 255, 20, 0.5); }
-        .prediction-output.small { color: var(--neon-red); text-shadow: 0 0 20px rgba(255, 49, 49, 0.5); }
-        .prediction-output.analyzing { color: var(--text-muted); font-size: 28px; animation: pulse 1.5s infinite; }
-        
-        .signal-meter { width: 100%; background: rgba(255, 255, 255, 0.03); height: 6px; border-radius: 3px; margin-top: 15px; overflow: hidden; }
-        .signal-bar { height: 100%; width: 0%; background: linear-gradient(90deg, var(--neon-purple), var(--neon-blue)); box-shadow: 0 0 10px var(--neon-blue); transition: width 0.6s ease; }
-        .signal-text { font-size: 11px; color: var(--text-muted); margin-top: 8px; font-family: monospace; }
-        .signal-text span { color: var(--gold); font-weight: bold; }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
 
-        .stats-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-bottom: 20px; }
-        .stat-card { background: rgba(255, 255, 255, 0.01); border: 1px solid rgba(255, 255, 255, 0.05); border-radius: 12px; padding: 10px; text-align: center; }
-        .stat-card p { font-size: 9px; color: var(--text-muted); text-transform: uppercase; }
-        .stat-card h2 { font-size: 16px; margin-top: 2px; font-weight: 700; }
+        body {
+            background-color: var(--bg-primary);
+            color: var(--text-main);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            overflow-x: hidden;
+            padding: 20px;
+        }
 
-        .history-panel { background: rgba(0, 0, 0, 0.3); border: 1px solid rgba(255, 255, 255, 0.05); border-radius: 12px; padding: 15px; max-height: 200px; display: flex; flex-direction: column; }
-        .history-header { display: flex; justify-content: space-between; font-size: 12px; margin-bottom: 8px; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 5px; }
-        .history-list { overflow-y: auto; flex-grow: 1; }
-        .history-item { display: flex; justify-content: space-between; padding: 6px 8px; background: rgba(255, 255, 255, 0.01); border-radius: 6px; margin-bottom: 5px; font-size: 12px; font-family: monospace; }
-        .history-item.win { border-left: 3px solid var(--neon-green); color: #cfc; }
-        .history-item.loss { border-left: 3px solid var(--neon-red); color: #fcc; }
+        .master-container {
+            width: 100%;
+            max-width: 500px;
+            background: var(--bg-secondary);
+            border: 2px solid var(--neon-blue);
+            border-radius: 20px;
+            box-shadow: 0 0 25px rgba(0, 243, 255, 0.2);
+            padding: 25px;
+            position: relative;
+            overflow: hidden;
+        }
 
-        @keyframes pulse { 0%, 100% { opacity: 0.4; } 50% { opacity: 1; } }
+        .master-container::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(157, 78, 221, 0.1) 0%, transparent 70%);
+            pointer-events: none;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 25px;
+            border-bottom: 1px solid rgba(0, 243, 255, 0.2);
+            padding-bottom: 15px;
+        }
+
+        .header h1 {
+            font-size: 24px;
+            font-weight: 800;
+            letter-spacing: 2px;
+            background: linear-gradient(45deg, var(--neon-blue), var(--neon-purple));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-transform: uppercase;
+        }
+
+        .header p {
+            font-size: 11px;
+            color: var(--text-muted);
+            margin-top: 5px;
+            letter-spacing: 4px;
+            text-transform: uppercase;
+        }
+
+        .display-panel {
+            background: rgba(0, 0, 0, 0.4);
+            border: 1px solid rgba(157, 78, 221, 0.3);
+            border-radius: 15px;
+            padding: 20px;
+            text-align: center;
+            margin-bottom: 25px;
+            box-shadow: inset 0 0 15px rgba(0, 0, 0, 0.6);
+        }
+
+        .current-period {
+            font-size: 14px;
+            color: var(--text-muted);
+            margin-bottom: 5px;
+        }
+
+        .current-period span {
+            color: var(--neon-blue);
+            font-weight: bold;
+        }
+
+        .timer-display {
+            font-size: 26px;
+            color: var(--gold);
+            font-weight: bold;
+            margin: 5px 0;
+            letter-spacing: 1px;
+        }
+
+        .prediction-output {
+            font-size: 48px;
+            font-weight: 900;
+            letter-spacing: 3px;
+            margin: 10px 0;
+            text-transform: uppercase;
+            text-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
+            transition: all 0.3s ease;
+        }
+
+        .prediction-output.big {
+            color: var(--neon-green);
+            text-shadow: 0 0 20px rgba(57, 255, 20, 0.6);
+        }
+
+        .prediction-output.small {
+            color: var(--neon-red);
+            text-shadow: 0 0 20px rgba(255, 49, 49, 0.6);
+        }
+
+        .prediction-output.analyzing {
+            color: var(--text-muted);
+            font-size: 32px;
+            animation: pulse 1.5s infinite;
+        }
+
+        .signal-meter {
+            width: 100%;
+            background: rgba(255, 255, 255, 0.05);
+            height: 6px;
+            border-radius: 3px;
+            margin-top: 15px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .signal-bar {
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(90deg, var(--neon-purple), var(--neon-blue));
+            box-shadow: 0 0 10px var(--neon-blue);
+            transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .signal-text {
+            font-size: 12px;
+            color: var(--text-muted);
+            margin-top: 8px;
+        }
+
+        .signal-text span {
+            color: var(--neon-blue);
+            font-weight: bold;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+
+        .stat-card {
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
+            padding: 12px;
+            text-align: center;
+        }
+
+        .stat-card p {
+            font-size: 11px;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            margin-bottom: 5px;
+        }
+
+        .stat-card h2 {
+            font-size: 18px;
+            color: var(--text-main);
+        }
+
+        .history-panel {
+            background: rgba(0, 0, 0, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
+            padding: 15px;
+            max-height: 250px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .history-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+            padding-bottom: 5px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .history-header h3 {
+            font-size: 14px;
+            color: var(--text-main);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .clear-btn {
+            background: transparent;
+            border: 1px solid var(--neon-red);
+            color: var(--neon-red);
+            padding: 4px 10px;
+            font-size: 10px;
+            border-radius: 6px;
+            cursor: pointer;
+            text-transform: uppercase;
+            transition: all 0.2s ease;
+        }
+
+        .clear-btn:hover {
+            background: var(--neon-red);
+            color: white;
+            box-shadow: 0 0 10px var(--neon-red);
+        }
+
+        .history-list {
+            overflow-y: auto;
+            flex-grow: 1;
+            padding-right: 5px;
+        }
+
+        .history-list::-webkit-scrollbar {
+            width: 4px;
+        }
+
+        .history-list::-webkit-scrollbar-thumb {
+            background: var(--neon-purple);
+            border-radius: 2px;
+        }
+
+        .history-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 10px;
+            background: rgba(255, 255, 255, 0.01);
+            border-radius: 6px;
+            margin-bottom: 6px;
+            font-size: 13px;
+            border-left: 3px solid transparent;
+        }
+
+        .history-item.win {
+            border-left-color: var(--neon-green);
+            background: rgba(57, 255, 20, 0.03);
+        }
+
+        .history-item.loss {
+            border-left-color: var(--neon-red);
+            background: rgba(255, 49, 49, 0.03);
+        }
+
+        .item-period {
+            color: var(--text-muted);
+        }
+
+        .item-pred {
+            font-weight: bold;
+        }
+
+        .item-pred.big { color: var(--neon-green); }
+        .item-pred.small { color: var(--neon-red); }
+
+        .item-result {
+            font-size: 11px;
+            font-weight: bold;
+            padding: 2px 6px;
+            border-radius: 4px;
+            text-transform: uppercase;
+        }
+
+        .item-result.win { background: rgba(57, 255, 20, 0.2); color: var(--neon-green); }
+        .item-result.loss { background: rgba(255, 49, 49, 0.2); color: var(--neon-red); }
+
+        @keyframes pulse {
+            0% { opacity: 0.5; }
+            50% { opacity: 1; }
+            100% { opacity: 0.5; }
+        }
     </style>
 </head>
 <body>
 
     <div class="master-container">
         <div class="header">
-            <h1>Quad Core Dominator</h1>
-            <p id="engineState">4 Pillars Fusion System (25% x4)</p>
+            <h1>Flexi V8 Dominator</h1>
+            <p>Quad-Core Hybrid Engine</p>
         </div>
 
         <div class="display-panel">
             <div class="current-period">TARGET PERIOD: <span id="targetPeriod">FETCHING...</span></div>
             <div id="clockTimer" class="timer-display">00:60</div>
-            <div class="prediction-output analyzing" id="predictionText">CONNECTING</div>
-            <div class="signal-meter"><div class="signal-bar" id="signalBar"></div></div>
-            <div class="signal-text">
-                <span id="mLevel">MARTINGALE: LV 1 (1X)</span> | WEIGHTS: <span id="wState">BALANCED</span>
+            <div class="prediction-output analyzing" id="predictionText">WAITING DATA</div>
+            <div class="signal-meter">
+                <div class="signal-bar" id="signalBar"></div>
             </div>
-            <div id="numRow" style="display: flex; justify-content: center; gap: 8px; margin-top: 10px;"></div>
+            <div class="signal-text">ENGINE CONFIDENCE: <span id="confidenceText">0%</span></div>
         </div>
 
         <div class="stats-grid">
-            <div class="stat-card"><p>WIN</p><h2 id="sWin" style="color:var(--neon-green);">0</h2></div>
-            <div class="stat-card"><p>LOSS</p><h2 id="sLoss" style="color:var(--neon-red);">0</h2></div>
-            <div class="stat-card"><p>ACCURACY</p><h2 id="sAcc" style="color:var(--gold);">0%</h2></div>
+            <div class="stat-card">
+                <p>Total Analyzed</p>
+                <h2 id="totalAnalyzed">0</h2>
+            </div>
+            <div class="stat-card">
+                <p>Accuracy Rate</p>
+                <h2 id="accuracyRate">0%</h2>
+            </div>
         </div>
 
         <div class="history-panel">
-            <div class="history-header"><span>RECENT LOGS</span><span style="color:var(--neon-blue); cursor:pointer;" onclick="resetStats()">RESET</span></div>
+            <div class="history-header">
+                <h3>Live Engine History (Max 100)</h3>
+                <button class="clear-btn" onclick="clearHistoryData()">Reset</button>
+            </div>
             <div class="history-list" id="historyList"></div>
         </div>
     </div>
 
     <script>
-        const API_URL = "https://draw.ar-lottery01.com/WinGo/WinGo_1M/GetHistoryIssuePage.json";
+        const MARKET_API = "https://draw.ar-lottery01.com/WinGo/WinGo_1M/GetHistoryIssuePage.json";
         
-        let logs = JSON.parse(localStorage.getItem('quad_core_logs')) || [];
-        let lastPeriod = null, expectedPeriod = null, cachedPred = null;
-        let lossStreak = 0, currentLevel = 1;
-        let targetNums = [];
+        let historyData = JSON.parse(localStorage.getItem('flexi_v8_history')) || [];
+        const MAX_HISTORY = 100;
 
-        // ৪টি খুঁটির গাণিতিক বেস ওয়েট (২৫% করে প্রতিটি)
-        let weights = { p1: 0.25, p2: 0.25, p3: 0.25, p4: 0.25 };
+        let lastActivePeriod = null;
+        let expectedNextPeriod = null;
+        let cachedPrediction = null;
+        let lossStreak = 0;
 
-        window.onload = () => {
-            renderLogs();
-            updateStats();
-            setInterval(fetchMarketData, 2000);
-            setInterval(runClock, 1000);
-        };
+        // ৪টি খুঁটির গাণিতিক বেস ক্ষমতা সমবন্টন (২৫% + ২৫% + ২৫% + ২৫%)
+        let engineWeights = { inPro: 0.25, flexiV8: 0.25, filterPremium: 0.25, votingEngine: 0.25 };
 
-        function runClock() {
-            const sec = 60 - new Date().getSeconds();
-            document.getElementById('clockTimer').innerText = `00:${sec < 10 ? '0'+sec : sec}`;
+        window.addEventListener('load', () => {
+            renderHistoryView();
+            updateStatsView();
+            syncWithLiveMarket();
+            setInterval(syncWithLiveMarket, 2000); 
+            startLiveClock();
+        });
+
+        function startLiveClock() {
+            setInterval(() => {
+                const remainingSeconds = 60 - new Date().getSeconds();
+                const timerElement = document.getElementById('clockTimer');
+                timerElement.innerText = `00:${remainingSeconds < 10 ? '0' + remainingSeconds : remainingSeconds}`;
+                timerElement.style.color = remainingSeconds <= 5 ? "#ff3131" : "#ffea00";
+            }, 1000);
         }
 
-        async function fetchMarketData() {
+        async function syncWithLiveMarket() {
             try {
-                const res = await fetch(API_URL + '?t=' + Date.now());
-                const json = await res.json();
-                const node = json.data.list[0];
+                const response = await fetch(MARKET_API + '?t=' + Date.now());
+                const resultJson = await response.json();
+                const freshTopNode = resultJson.data.list[0];
                 
-                if (lastPeriod !== node.issueNumber) {
-                    if (expectedPeriod && lastPeriod === node.issueNumber) {
-                        evaluateCycle(node.issueNumber, parseInt(node.number));
-                    }
-                    lastPeriod = node.issueNumber;
-                    expectedPeriod = (BigInt(lastPeriod) + 1n).toString();
-                    document.getElementById('targetPeriod').innerText = expectedPeriod;
-                    
-                    calculateQuadPrediction(expectedPeriod, json.data.list);
-                }
-            } catch (e) {}
+                processMarketPayload(freshTopNode.issueNumber, parseInt(freshTopNode.number), resultJson.data.list);
+            } catch (error) {}
         }
 
-        function calculateQuadPrediction(targetPeriod, list) {
-            const output = document.getElementById('predictionText');
-            output.innerText = "ANALYZING...";
-            output.className = "prediction-output analyzing";
+        function processMarketPayload(currentPeriod, blockNumber, fallbackList) {
+            const actualOutcome = blockNumber >= 5 ? "BIG" : "SMALL";
 
+            if (lastActivePeriod !== currentPeriod) {
+                if (expectedNextPeriod && lastActivePeriod) {
+                    resolveEngineCycle(currentPeriod, actualOutcome);
+                }
+
+                lastActivePeriod = currentPeriod;
+                expectedNextPeriod = (BigInt(currentPeriod) + 1n).toString();
+                
+                document.getElementById('targetPeriod').innerText = expectedNextPeriod;
+                executeUnifiedPrediction(expectedNextPeriod, fallbackList);
+            }
+        }
+
+        function executeUnifiedPrediction(targetPeriod, rawHistoryList) {
+            const outputField = document.getElementById('predictionText');
+            outputField.innerText = "ANALYZING...";
+            outputField.className = "prediction-output analyzing";
+            
             setTimeout(() => {
                 const seed = parseInt(targetPeriod.slice(-4));
-                const results = list.slice(0, 20).map(x => parseInt(x.number));
+                const results = rawHistoryList.slice(0, 20).map(x => parseInt(x.number));
                 const bigCount = results.filter(n => n >= 5).length;
                 const smallCount = results.filter(n => n <= 4).length;
-
-                // --- খুঁটি ১: Infinix Pro (ট্রেন্ড সিগনাল) ---
-                let s1 = (seed % 2 === 0) ? 0.60 : -0.60;
-                if(results[0] >= 5 && results[1] >= 5) s1 += 0.20;
-
-                // --- খুঁটি ২: Flexi V8 (ত্রিকোণমিতিক তরঙ্গ) ---
-                let s2 = (Math.sin(seed * 0.45) > 0) ? 0.75 : -0.75;
-
-                // --- খুঁটি ৩: Premium Filter (বিপরীত সেফটি) ---
-                let s3 = (list[0]?.number >= 5) ? -0.50 : 0.50;
-
-                // --- খুঁটি ৪: New Voting Engine (৪০টি ভোটের লুপ লজিক) ---
-                let bigVotes = 0, smallVotes = 0;
-                for(let i=0; i<40; i++) {
-                    let v = "BIG";
-                    if(i < 15) v = bigCount > smallCount ? "BIG" : "SMALL";
-                    else if(i < 30) {
-                        let calc = ((results[0]||5) + (results[4]||5) - parseInt(targetPeriod.slice(-1))) % 10;
-                        v = calc <= 4 ? "SMALL" : "BIG";
-                    } else {
-                        v = lossStreak >= 1 ? (bigCount > smallCount ? "SMALL" : "BIG") : (bigCount > smallCount ? "BIG" : "SMALL");
-                    }
-                    v === "BIG" ? bigVotes++ : smallVotes++;
-                }
-                let s4 = bigVotes > smallVotes ? 0.70 : -0.70;
-
-                // ৪টি খুঁটির সম্মিলিত গাণিতিক ফিউশন সূত্র (২৫% করে সমবন্টন)
-                let fusionScore = (s1 * weights.p1) + (s2 * weights.p2) + (s3 * weights.p3) + (s4 * weights.p4);
-
-                // টাই ব্রেকার লজিক (স্কোর ০ হলেও ফিক্সড রেজাল্ট আসবে)
-                let finalDecision = fusionScore >= 0 ? "BIG" : "SMALL";
-                cachedPred = finalDecision;
-
-                // এক্যুরেসি ও কনফিডেন্স মেটার লকিং
-                let conf = Math.min(Math.max(Math.floor(55 + (Math.abs(fusionScore) * 85)), 75), 99);
-                if (seed % 11 === 0 || seed % 19 === 0) conf = Math.floor(Math.random() * (99 - 96 + 1)) + 96; // SURE SHOT
-
-                // টার্গেট সংখ্যা নির্ধারণ
-                targetNums = finalDecision === "BIG" ? [1, 3] : [6, 8];
-
-                output.innerText = finalDecision;
-                output.className = `prediction-output ${finalDecision.toLowerCase()}`;
-                document.getElementById('signalBar').style.width = `${conf}%`;
                 
-                document.getElementById('numRow').innerHTML = `
-                    <div style="background:var(--neon-purple); border-radius:50%; width:28px; height:28px; display:flex; justify-content:center; align-items:center; font-weight:bold; font-size:12px;">${targetNums[0]}</div>
-                    <div style="background:var(--neon-blue); color:#000; border-radius:50%; width:28px; height:28px; display:flex; justify-content:center; align-items:center; font-weight:bold; font-size:12px;">${targetNums[1]}</div>
-                `;
-            }, 700);
+                // --- খুঁটি ১: Infinix Pro Core লজিক ---
+                let scoreInPro = (seed % 2 === 0) ? 0.65 : -0.65;
+                if (historyData.length > 5) {
+                    const lastFive = historyData.slice(0, 5);
+                    const bigs = lastFive.filter(item => item.prediction === 'BIG').length;
+                    if (bigs >= 4) scoreInPro -= 0.15; 
+                }
+
+                // --- খুঁটি ২: Flexi V8 Core লজিক (উচ্চ তরঙ্গ মেকানিজম) ---
+                let scoreFlexiV8 = (Math.sin(seed * 0.45) > 0) ? 0.70 : -0.70;
+
+                // --- খুঁটি ৩: Premium Filter লজিক ---
+                let scoreFilterPremium = 0;
+                if (historyData.length > 0) {
+                    scoreFilterPremium = (historyData[0].prediction === 'BIG') ? -0.55 : 0.55;
+                } else {
+                    scoreFilterPremium = (seed % 3 === 0 || seed % 7 === 0) ? 0.60 : -0.60;
+                }
+
+                // --- খুঁটি ৪: New Voting Engine (৪০টি ভোটের লুপ মেকানিজম) ---
+                let bigVotes = 0, smallVotes = 0;
+                for(let i = 0; i < 40; i++) {
+                    let vote = "BIG";
+                    if(i < 15) vote = bigCount > smallCount ? "BIG" : "SMALL";
+                    else if(i < 30) {
+                        let sum = (rawHistoryList[0]?.number || 5) + (rawHistoryList[4]?.number || 5);
+                        let calc = (sum - parseInt(targetPeriod.slice(-1))) % 10;
+                        vote = calc <= 4 ? "SMALL" : "BIG";
+                    } else {
+                        vote = lossStreak >= 1 ? (bigCount > smallCount ? "SMALL" : "BIG") : (bigCount > smallCount ? "BIG" : "SMALL");
+                    }
+                    if(vote === "BIG") bigVotes++; else smallVotes++;
+                }
+                let scoreVotingEngine = bigVotes > smallVotes ? 0.75 : -0.75;
+
+                // ৪টি খুঁটির ফিউশন ক্যালকুলেশন (২৫% করে সমবন্টন)
+                let absoluteFusionScore = 
+                    (scoreInPro * engineWeights.inPro) + 
+                    (scoreFlexiV8 * engineWeights.flexiV8) + 
+                    (scoreFilterPremium * engineWeights.filterPremium) +
+                    (scoreVotingEngine * engineWeights.votingEngine);
+
+                // ফাইনাল ডিসিশন এবং টাই ব্রেকার লকিং
+                let finalDecision = absoluteFusionScore >= 0 ? 'BIG' : 'SMALL';
+                
+                let confidenceFactor = Math.min(Math.max(Math.floor(50 + (Math.abs(absoluteFusionScore) * 100)), 72), 99);
+
+                // সিওর শট ক্যাপচারিং মেকানিজম (১১ এবং ১৯ এর ঘরের নামতা)
+                if (seed % 11 === 0 || seed % 19 === 0) {
+                    confidenceFactor = Math.floor(Math.random() * (99 - 95 + 1)) + 95; 
+                }
+
+                outputField.innerText = finalDecision;
+                outputField.className = `prediction-output ${finalDecision.toLowerCase()}`;
+
+                document.getElementById('confidenceText').innerText = `${confidenceFactor}%`;
+                document.getElementById('signalBar').style.width = `${confidenceFactor}%`;
+
+                cachedPrediction = finalDecision;
+
+            }, 800); 
         }
 
-        function evaluateCycle(period, realNum) {
-            if (!cachedPred) return;
-            const outcome = realNum >= 5 ? "BIG" : "SMALL";
-            const isWin = (cachedPred === outcome) || targetNums.includes(realNum);
+        function resolveEngineCycle(resolvedPeriod, trueOutcome) {
+            if (!cachedPrediction) return;
 
-            if (isWin) {
-                lossStreak = 0; currentLevel = 1;
-                // উইন হলে খুঁটি আবার ব্যালেন্সড হয়ে যাবে
-                weights = { p1: 0.25, p2: 0.25, p3: 0.25, p4: 0.25 };
-                document.getElementById('wState').innerText = "BALANCED";
-                document.getElementById('wState').style.color = "var(--neon-green)";
+            const isWin = (cachedPrediction === trueOutcome);
+
+            if (!isWin) {
+                lossStreak++;
+                // সেলফ কারেকশন: লস হলে খুঁটি অটো-ব্যালেন্স সামলাতে সাময়িক ক্ষমতা পরিবর্তন করে
+                engineWeights = { inPro: 0.15, flexiV8: 0.40, filterPremium: 0.15, votingEngine: 0.30 };
             } else {
-                lossStreak++; currentLevel++;
-                if(currentLevel > 4) currentLevel = 1;
-                
-                // লস হলে খুঁটির ক্ষমতা অটো শিফট হবে (গাণিতিক তরঙ্গে বেশি পাওয়ার)
-                weights = { p1: 0.15, p2: 0.40, p3: 0.15, p4: 0.30 };
-                document.getElementById('wState').innerText = "RECOVERING";
-                document.getElementById('wState').style.color = "var(--neon-red)";
+                lossStreak = 0;
+                // উইন হলে আবার নিখুঁত ২৫% সমবন্টনে ফিরে যায়
+                engineWeights = { inPro: 0.25, flexiV8: 0.25, filterPremium: 0.25, votingEngine: 0.25 };
             }
 
-            const multi = currentLevel === 1 ? "1X" : (currentLevel === 2 ? "3X" : (currentLevel === 3 ? "9X" : "27X"));
-            document.getElementById('mLevel').innerText = `MARTINGALE: LV ${currentLevel} (${multi})`;
+            const newHistoryItem = {
+                period: resolvedPeriod,
+                prediction: cachedPrediction,
+                result: isWin ? 'WIN' : 'LOSS'
+            };
 
-            logs.unshift({ period: period.slice(-4), pred: cachedPred, status: isWin ? "WIN" : "LOSS" });
-            if(logs.length > 50) logs.pop();
+            historyData.unshift(newHistoryItem);
+
+            // ১০০ পিরিয়ড বাউন্ডারি লিমিট মেইনটেইন (FIFO Logic)
+            if (historyData.length > MAX_HISTORY) {
+                historyData.pop();
+            }
+
+            localStorage.setItem('flexi_v8_history', JSON.stringify(historyData));
             
-            localStorage.setItem('quad_core_logs', JSON.stringify(logs));
-            renderLogs();
-            updateStats();
+            renderHistoryView();
+            updateStatsView();
         }
 
-        function renderLogs() {
-            const list = document.getElementById('historyList');
-            list.innerHTML = logs.map(x => `
-                <div class="history-item ${x.status.toLowerCase()}">
-                    <span>PERIOD: ${x.period}</span>
-                    <span>PRED: ${x.pred}</span>
-                    <span style="font-weight:bold;">${x.status}</span>
-                </div>
-            `).join('');
+        function renderHistoryView() {
+            const listContainer = document.getElementById('historyList');
+            listContainer.innerHTML = '';
+
+            historyData.forEach(item => {
+                const row = document.createElement('div');
+                row.className = `history-item ${item.result.toLowerCase()}`;
+
+                row.innerHTML = `
+                    <span class="item-period">${item.period.toString().slice(-4)}</span>
+                    <span class="item-pred ${item.prediction.toLowerCase()}">${item.prediction}</span>
+                    <span class="item-result ${item.result.toLowerCase()}">${item.result}</span>
+                `;
+                listContainer.appendChild(row);
+            });
         }
 
-        function updateStats() {
-            const total = logs.length;
-            if(total === 0) return;
-            const wins = logs.filter(x => x.status === "WIN").length;
-            document.getElementById('sWin').innerText = wins;
-            document.getElementById('sLoss').innerText = total - wins;
-            document.getElementById('sAcc').innerText = `${Math.round((wins/total)*100)}%`;
+        function updateStatsView() {
+            const total = historyData.length;
+            document.getElementById('totalAnalyzed').innerText = total;
+
+            if (total === 0) {
+                document.getElementById('accuracyRate').innerText = '0%';
+                return;
+            }
+
+            const wins = historyData.filter(item => item.result === 'WIN').length;
+            const percentage = Math.round((wins / total) * 100);
+            document.getElementById('accuracyRate').innerText = `${percentage}%`;
         }
 
-        function resetStats() {
-            logs = []; localStorage.removeItem('quad_core_logs');
-            document.getElementById('sWin').innerText = 0;
-            document.getElementById('sLoss').innerText = 0;
-            document.getElementById('sAcc').innerText = "0%";
-            renderLogs();
+        function clearHistoryData() {
+            historyData = [];
+            lossStreak = 0;
+            engineWeights = { inPro: 0.25, flexiV8: 0.25, filterPremium: 0.25, votingEngine: 0.25 };
+            localStorage.removeItem('flexi_v8_history');
+            renderHistoryView();
+            updateStatsView();
         }
     </script>
 </body>
